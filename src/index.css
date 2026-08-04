@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+/*
+  Design tokens for the FAJ Prime Estates admin dashboard.
+
+  This is a working tool, not a marketing page — so the layout itself
+  is a standard sidebar + content shell (the right structural choice
+  for navigating 11+ resource types quickly, not a generic template).
+  Brand identity carries through via color and the serif display face,
+  used sparingly (page titles, the sidebar wordmark) — everything
+  functional (tables, forms, data) uses the sans face for maximum
+  legibility, since that's what a daily-use CMS actually needs.
+*/
+@theme {
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Navy — sidebar, headers, primary brand color */
+  --color-navy-950: #0a1420;
+  --color-navy-900: #0f1f2e;
+  --color-navy-800: #17293c;
+  --color-navy-700: #22384f;
+
+  /* Gold — the one accent, used deliberately (active nav state, key actions) */
+  --color-gold-600: #a8841f;
+  --color-gold-500: #c9a227;
+  --color-gold-400: #dbb94a;
+  --color-gold-100: #f7ecc9;
+
+  /* Slate — content backgrounds, body text, borders */
+  --color-slate-50: #f8f9fb;
+  --color-slate-100: #eef1f4;
+  --color-slate-200: #dde2e8;
+  --color-slate-400: #8b96a3;
+  --color-slate-600: #52606d;
+  --color-slate-800: #2a333d;
+
+  /* Status colors — functional necessity for CMS state (submissions,
+     bookings), not decoration */
+  --color-status-new: #2563eb;
+  --color-status-pending: #d97706;
+  --color-status-success: #16a34a;
+  --color-status-danger: #dc2626;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-slate-50);
+  color: var(--color-slate-800);
+}
