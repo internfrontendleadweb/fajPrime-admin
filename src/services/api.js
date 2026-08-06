@@ -19,11 +19,24 @@ class ApiError extends Error {
 }
 
 async function request(path, options = {}) {
-  const res = await fetch(`${API_URL}${path}`, {
-    credentials: "include",
-    headers: options.body instanceof FormData ? {} : { "Content-Type": "application/json" },
-    ...options,
-  });
+  let res;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      credentials: "include",
+      headers: options.body instanceof FormData ? {} : { "Content-Type": "application/json" },
+      ...options,
+    });
+  } catch {
+    // fetch() itself throws (not a bad response, an actual failure to
+    // connect at all) for things like: the backend is down, there's no
+    // internet connection, or CORS blocked the request before a response
+    // ever came back. Left alone, this surfaces as a raw browser message
+    // like "Failed to fetch" - meaningless to anyone who isn't a developer.
+    throw new ApiError(
+      "Unable to reach the server. Please check your internet connection and try again.",
+      0
+    );
+  }
 
   // 204 No Content (delete endpoints) has no body to parse
   if (res.status === 204) return null;

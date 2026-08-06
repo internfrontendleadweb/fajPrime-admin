@@ -98,4 +98,34 @@ describe("Login page", () => {
       expect(loginCallBody).toEqual({ email: "admin@example.com", password: "correctpassword" });
     });
   });
+
+  it("shows a friendly message when the server is completely unreachable, not a raw browser error", async () => {
+    global.fetch = vi.fn((url) => {
+      if (url.includes("/auth/me")) {
+        return Promise.resolve({ ok: false, status: 401, json: () => Promise.resolve({}) });
+      }
+      // Simulates fetch() itself throwing - the backend being down,
+      // no internet, or a CORS failure before any response comes
+      // back. This is a real bug we hit: left unhandled, this surfaces
+      // as a raw "Failed to fetch" message that means nothing to a
+      // non-technical admin.
+      if (url.includes("/auth/login")) {
+        return Promise.reject(new TypeError("Failed to fetch"));
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+    });
+
+    const user = userEvent.setup();
+    renderLogin();
+
+    await user.type(screen.getByLabelText("Email", { exact: true }), "admin@example.com");
+    await user.type(screen.getByLabelText("Password", { exact: true }), "anypassword");
+    await user.click(screen.getByRole("button", { name: /sign in/i }));
+
+    expect(
+      await screen.findByText("Unable to reach the server. Please check your internet connection and try again.")
+    ).toBeInTheDocument();
+    // The raw, meaningless browser error should never reach the screen.
+    expect(screen.queryByText(/failed to fetch/i)).not.toBeInTheDocument();
+  });
 });
