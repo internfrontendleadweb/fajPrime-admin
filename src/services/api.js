@@ -23,7 +23,11 @@ async function request(path, options = {}) {
   try {
     res = await fetch(`${API_URL}${path}`, {
       credentials: "include",
-      headers: options.body instanceof FormData ? {} : { "Content-Type": "application/json" },
+      cache: "no-store",
+      headers:
+        options.body instanceof FormData
+          ? {}
+          : { "Content-Type": "application/json" },
       ...options,
     });
   } catch {
@@ -34,7 +38,7 @@ async function request(path, options = {}) {
     // like "Failed to fetch" - meaningless to anyone who isn't a developer.
     throw new ApiError(
       "Unable to reach the server. Please check your internet connection and try again.",
-      0
+      0,
     );
   }
 
@@ -44,7 +48,11 @@ async function request(path, options = {}) {
   const data = await res.json().catch(() => null);
 
   if (!res.ok) {
-    throw new ApiError(data?.error || `Request failed (${res.status})`, res.status, data?.details);
+    throw new ApiError(
+      data?.error || `Request failed (${res.status})`,
+      res.status,
+      data?.details,
+    );
   }
 
   return data;
@@ -52,9 +60,15 @@ async function request(path, options = {}) {
 
 export const api = {
   get: (path) => request(path),
-  post: (path, body) => request(path, { method: "POST", body: body instanceof FormData ? body : JSON.stringify(body) }),
-  put: (path, body) => request(path, { method: "PUT", body: JSON.stringify(body) }),
-  patch: (path, body) => request(path, { method: "PATCH", body: JSON.stringify(body) }),
+  post: (path, body) =>
+    request(path, {
+      method: "POST",
+      body: body instanceof FormData ? body : JSON.stringify(body),
+    }),
+  put: (path, body) =>
+    request(path, { method: "PUT", body: JSON.stringify(body) }),
+  patch: (path, body) =>
+    request(path, { method: "PATCH", body: JSON.stringify(body) }),
   delete: (path) => request(path, { method: "DELETE" }),
 };
 
