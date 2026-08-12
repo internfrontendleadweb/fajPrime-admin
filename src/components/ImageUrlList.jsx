@@ -1,12 +1,19 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ImageOff, Loader2, Plus, Upload, X } from "lucide-react";
-import { uploadImage } from "../services/uploads.js";
+import { deleteUnusedUpload, uploadImage } from "../services/uploads.js";
 
 // Retains the original component name so all listing/project forms use the
 // new uploader without changing their data shape (an array of image URLs).
 export default function ImageUrlList({ value = [], onChange, folder, onUploadingChange }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const pendingAssets = useRef(new Map());
+
+  useEffect(() => () => {
+    for (const { publicId } of pendingAssets.current.values()) {
+      void deleteUnusedUpload(publicId).catch(() => {});
+    }
+  }, []);
 
   async function handleFilesChange(event) {
     const files = Array.from(event.target.files || []);
@@ -22,7 +29,8 @@ export default function ImageUrlList({ value = [], onChange, folder, onUploading
       // Upload sequentially so the endpoint's one-file limit is respected and
       // each completed image appears immediately.
       for (const file of files) {
-        const { url } = await uploadImage(file, folder);
+        const { url, publicId } = await uploadImage(file, folder);
+        pendingAssets.current.set(url, { publicId });
         uploadedUrls.push(url);
         onChange([...value, ...uploadedUrls]);
       }
@@ -35,6 +43,11 @@ export default function ImageUrlList({ value = [], onChange, folder, onUploading
   }
 
   function removeUrl(url) {
+    const asset = pendingAssets.current.get(url);
+    if (asset) {
+      pendingAssets.current.delete(url);
+      void deleteUnusedUpload(asset.publicId).catch(() => {});
+    }
     onChange(value.filter((item) => item !== url));
   }
 

@@ -18,3 +18,9 @@ export async function uploadImage(file, folder) {
 
   return api.post("/admin/upload", formData);
 }
+
+// The backend only permits deletion of tracked assets that are not referenced
+// by any saved content record, so this is safe for cancelled form uploads.
+export function deleteUnusedUpload(publicId) {
+  return api.delete(`/admin/upload/${encodeURIComponent(publicId)}`);
+}

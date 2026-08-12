@@ -1,12 +1,22 @@
 import { ImageOff, Loader2, Trash2, Upload } from "lucide-react";
-import { useState } from "react";
-import { uploadImage } from "../services/uploads.js";
+import { useEffect, useRef, useState } from "react";
+import { deleteUnusedUpload, uploadImage } from "../services/uploads.js";
 
 // Uploads a single image to Cloudinary, then gives the owning form its URL.
 // Existing records remain compatible because their image fields are still URL strings.
 export default function SingleImageInput({ value = "", onChange, folder, onUploadingChange }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const pendingAsset = useRef(null);
+
+  async function discardPendingAsset() {
+    const asset = pendingAsset.current;
+    if (!asset) return;
+    pendingAsset.current = null;
+    await deleteUnusedUpload(asset.publicId).catch(() => {});
+  }
+
+  useEffect(() => () => { void discardPendingAsset(); }, []);
 
   async function handleFileChange(event) {
     const file = event.target.files?.[0];
@@ -17,7 +27,9 @@ export default function SingleImageInput({ value = "", onChange, folder, onUploa
     setUploading(true);
     onUploadingChange?.(true);
     try {
-      const { url } = await uploadImage(file, folder);
+      await discardPendingAsset();
+      const { url, publicId } = await uploadImage(file, folder);
+      pendingAsset.current = { url, publicId };
       onChange(url);
     } catch (err) {
       setError(err.message || "Unable to upload this image.");
@@ -46,7 +58,7 @@ export default function SingleImageInput({ value = "", onChange, folder, onUploa
             />
           </label>
           {value && (
-            <button type="button" onClick={() => onChange("")} disabled={uploading} className="ml-2 inline-flex items-center gap-1 text-sm text-red-600 hover:text-red-700 disabled:opacity-50">
+            <button type="button" onClick={() => { void discardPendingAsset(); onChange(""); }} disabled={uploading} className="ml-2 inline-flex items-center gap-1 text-sm text-red-600 hover:text-red-700 disabled:opacity-50">
               <Trash2 size={15} /> Remove
             </button>
           )}
