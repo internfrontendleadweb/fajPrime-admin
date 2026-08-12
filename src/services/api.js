@@ -70,6 +70,24 @@ export const api = {
   patch: (path, body) =>
     request(path, { method: "PATCH", body: JSON.stringify(body) }),
   delete: (path) => request(path, { method: "DELETE" }),
+  download: async (path) => {
+    let res;
+    try {
+      res = await fetch(`${API_URL}${path}`, { credentials: "include", cache: "no-store" });
+    } catch {
+      throw new ApiError(
+        "Unable to reach the server. Please check your internet connection and try again.",
+        0,
+      );
+    }
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => null);
+      throw new ApiError(data?.error || `Request failed (${res.status})`, res.status, data?.details);
+    }
+
+    return res.blob();
+  },
 };
 
 export { ApiError };
