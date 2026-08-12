@@ -34,6 +34,7 @@ export default function ProjectForm() {
   const location = useLocation();
   const { showToast } = useToast();
   const [loading] = useState(false);
+  const [imagesUploading, setImagesUploading] = useState(false);
 
   const {
     register,
@@ -63,6 +64,7 @@ export default function ProjectForm() {
   }, [id]);
 
   const onSubmit = async (data) => {
+    if (imagesUploading) return;
     try {
       if (isEdit) {
         await projectsService.update(id, data);
@@ -147,11 +149,11 @@ export default function ProjectForm() {
 
           <div>
             <label htmlFor="images" className="block text-sm font-medium text-slate-700 mb-1.5">Images</label>
-            <Controller name="images" control={control} render={({ field }) => <ImageUrlList value={field.value} onChange={field.onChange} />} />
+            <Controller name="images" control={control} render={({ field }) => <ImageUrlList value={field.value} onChange={field.onChange} folder="projects" onUploadingChange={setImagesUploading} />} />
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={isSubmitting} className="flex items-center gap-2 bg-gold-500 hover:bg-gold-400 disabled:opacity-60 text-navy-950 font-semibold text-sm px-5 py-2.5 rounded-md transition-colors">
+            <button type="submit" disabled={isSubmitting || imagesUploading} className="flex items-center gap-2 bg-gold-500 hover:bg-gold-400 disabled:opacity-60 text-navy-950 font-semibold text-sm px-5 py-2.5 rounded-md transition-colors">
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}
               {isEdit ? "Save Changes" : "Create Project"}
             </button>

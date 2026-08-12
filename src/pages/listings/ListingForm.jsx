@@ -55,6 +55,7 @@ export default function ListingForm() {
   const [agents, setAgents] = useState([]);
   const [loading, setLoading] = useState(isEdit);
   const [notFound, setNotFound] = useState(false);
+  const [imagesUploading, setImagesUploading] = useState(false);
 
   const {
     register,
@@ -108,6 +109,7 @@ export default function ListingForm() {
   }, [id]);
 
   const onSubmit = async (data) => {
+    if (imagesUploading) return;
     const payload = { ...data, agentId: data.agentId || undefined };
     try {
       if (isEdit) {
@@ -278,7 +280,7 @@ export default function ListingForm() {
             <Controller
               name="images"
               control={control}
-              render={({ field }) => <ImageUrlList value={field.value} onChange={field.onChange} />}
+              render={({ field }) => <ImageUrlList value={field.value} onChange={field.onChange} folder="properties" onUploadingChange={setImagesUploading} />}
             />
           </div>
 
@@ -290,7 +292,7 @@ export default function ListingForm() {
           <div className="flex gap-3 pt-2">
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || imagesUploading}
               className="flex items-center gap-2 bg-gold-500 hover:bg-gold-400 disabled:opacity-60 text-navy-950 font-semibold text-sm px-5 py-2.5 rounded-md transition-colors"
             >
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -21,6 +21,7 @@ export default function PartnerForm() {
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useToast();
+  const [logoUploading, setLogoUploading] = useState(false);
 
   const {
     register,
@@ -39,6 +40,7 @@ export default function PartnerForm() {
   }, [id]);
 
   const onSubmit = async (data) => {
+    if (logoUploading) return;
     try {
       if (isEdit) {
         await partnersService.update(id, data);
@@ -71,12 +73,12 @@ export default function PartnerForm() {
 
           <div>
             <label htmlFor="logo" className="block text-sm font-medium text-slate-700 mb-1.5">Logo</label>
-            <Controller name="logo" control={control} render={({ field }) => <SingleImageInput value={field.value} onChange={field.onChange} placeholder="/images/partners/logo.webp" />} />
+            <Controller name="logo" control={control} render={({ field }) => <SingleImageInput value={field.value} onChange={field.onChange} folder="partners" onUploadingChange={setLogoUploading} />} />
             {errors.logo && <p className="text-red-600 text-xs mt-1">{errors.logo.message}</p>}
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={isSubmitting} className="flex items-center gap-2 bg-gold-500 hover:bg-gold-400 disabled:opacity-60 text-navy-950 font-semibold text-sm px-5 py-2.5 rounded-md transition-colors">
+            <button type="submit" disabled={isSubmitting || logoUploading} className="flex items-center gap-2 bg-gold-500 hover:bg-gold-400 disabled:opacity-60 text-navy-950 font-semibold text-sm px-5 py-2.5 rounded-md transition-colors">
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}
               {isEdit ? "Save Changes" : "Create Partner"}
             </button>

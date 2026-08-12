@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -24,6 +24,7 @@ export default function TestimonialForm() {
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useToast();
+  const [imageUploading, setImageUploading] = useState(false);
 
   const {
     register,
@@ -48,6 +49,7 @@ export default function TestimonialForm() {
   }, [id]);
 
   const onSubmit = async (data) => {
+    if (imageUploading) return;
     try {
       if (isEdit) {
         await testimonialsService.update(id, data);
@@ -98,12 +100,12 @@ export default function TestimonialForm() {
 
           <div>
             <label htmlFor="image" className="block text-sm font-medium text-slate-700 mb-1.5">Photo</label>
-            <Controller name="image" control={control} render={({ field }) => <SingleImageInput value={field.value} onChange={field.onChange} />} />
+            <Controller name="image" control={control} render={({ field }) => <SingleImageInput value={field.value} onChange={field.onChange} onUploadingChange={setImageUploading} />} />
             {errors.image && <p className="text-red-600 text-xs mt-1">{errors.image.message}</p>}
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={isSubmitting} className="flex items-center gap-2 bg-gold-500 hover:bg-gold-400 disabled:opacity-60 text-navy-950 font-semibold text-sm px-5 py-2.5 rounded-md transition-colors">
+            <button type="submit" disabled={isSubmitting || imageUploading} className="flex items-center gap-2 bg-gold-500 hover:bg-gold-400 disabled:opacity-60 text-navy-950 font-semibold text-sm px-5 py-2.5 rounded-md transition-colors">
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}
               {isEdit ? "Save Changes" : "Create Testimonial"}
             </button>

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -24,6 +24,7 @@ export default function AgentForm() {
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useToast();
+  const [photoUploading, setPhotoUploading] = useState(false);
 
   const {
     register,
@@ -42,6 +43,7 @@ export default function AgentForm() {
   }, [id]);
 
   const onSubmit = async (data) => {
+    if (photoUploading) return;
     const payload = { ...data, photo: data.photo || undefined };
     try {
       if (isEdit) {
@@ -94,11 +96,11 @@ export default function AgentForm() {
 
           <div>
             <label htmlFor="photo" className="block text-sm font-medium text-slate-700 mb-1.5">Photo <span className="text-slate-400 font-normal">(optional)</span></label>
-            <Controller name="photo" control={control} render={({ field }) => <SingleImageInput value={field.value} onChange={field.onChange} />} />
+            <Controller name="photo" control={control} render={({ field }) => <SingleImageInput value={field.value} onChange={field.onChange} onUploadingChange={setPhotoUploading} />} />
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button type="submit" disabled={isSubmitting} className="flex items-center gap-2 bg-gold-500 hover:bg-gold-400 disabled:opacity-60 text-navy-950 font-semibold text-sm px-5 py-2.5 rounded-md transition-colors">
+            <button type="submit" disabled={isSubmitting || photoUploading} className="flex items-center gap-2 bg-gold-500 hover:bg-gold-400 disabled:opacity-60 text-navy-950 font-semibold text-sm px-5 py-2.5 rounded-md transition-colors">
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}
               {isEdit ? "Save Changes" : "Create Agent"}
             </button>
