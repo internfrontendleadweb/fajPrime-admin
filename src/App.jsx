@@ -23,6 +23,7 @@ import PartnersList from "./pages/partners/PartnersList.jsx";
 import PartnerForm from "./pages/partners/PartnerForm.jsx";
 import AgentsList from "./pages/agents/AgentsList.jsx";
 import AgentForm from "./pages/agents/AgentForm.jsx";
+import ContactSubmissionsList from "./pages/contact-submissions/ContactSubmissionsList.jsx";
 
 // All 8 content resources now follow the identical pattern Listings
 // established in Section 4. Only the 3 submission-management screens
@@ -70,7 +71,7 @@ export default function App() {
               <Route path="/agents/new" element={<AgentForm />} />
               <Route path="/agents/:id/edit" element={<AgentForm />} />
 
-              <Route path="/contact-submissions" element={<ComingSoon title="Contact Submissions" />} />
+              <Route path="/contact-submissions" element={<ContactSubmissionsList />} />
               <Route path="/inspections" element={<ComingSoon title="Inspection Bookings" />} />
               <Route path="/newsletter" element={<ComingSoon title="Newsletter" />} />
             </Route>
